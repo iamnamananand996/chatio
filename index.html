@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head>
+         <title>Chat IO</title>
+         <style>
+             body{
+                 background:gray;
+             }
+
+             h2{
+                 color: blueviolet;
+             }
+
+             li{
+                 text-decoration-style: none;
+             }
+
+             #container{
+                width: 700px;
+                margin: 0 auto;
+             }
+
+             #chatWrapper{
+                float: left;
+                border: 1px #ccc solid;
+                border-radius: 10px;
+                background: #f4f4f4;
+                padding: 10px;
+             }
+
+             #mainWrapper{
+                display: none;
+             }
+
+             #chatWindow{
+                height: 300px;;
+             }
+
+             #userWrapper{
+                float: left ;
+                border: 1px #ccc solid;
+                border-radius: 10px;
+                background: #f4f4f4;
+                padding: 10px;
+                margin-left : 20px;
+                width : 150px;
+                max-height: 200px;
+             }
+
+             #namesWrapper{
+                float: left;
+                border: 1px #ccc solid;
+                border-radius: 10px;
+                background: #f4f4f4;
+                padding: 10px;
+                margin-left: 20px;
+               
+                
+             }
+
+             input{
+                 height: 30px;
+             }
+
+             button {
+                border: none;
+                color: white;
+                padding: 10px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+                background-color: #008CBA;
+            }
+         </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="namesWrapper">
+                <h2>Chat IO</h2>
+                <p>Create Username</p>
+                <div id="error"></div>
+                <form id="usernameFrom">
+                        <input id="username" autocomplete="off" /><button>Send</button>
+                      </form>
+            </div>
+
+            <div id="mainWrapper">
+                <h2>Chat IO</h2>
+                <div id="chatWrapper">
+                    <div id="chatWindow"></div>
+                    <form id="messageFrom">
+                            <input id="m" autocomplete="off" /><button>Send</button>
+                          </form>
+
+                    </div>
+
+                    <div id="userWrapper">
+                        <div id="users"></div>
+
+                    </div>
+            </div>
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        
+        <script>
+                $(function () {
+                  var socket = io();
+                  var $usernameFrom = $('#usernameFrom');
+                  var $users = $('#users');
+                  var $username = $('#username');
+                  var $error = $('#error'); 
+
+                    
+
+
+                    $('#usernameFrom').submit(function(){
+                        socket.emit('newuser', $('#username').val(),function(data){
+                            if(data){
+                                $('#namesWrapper').hide();
+                                $('#mainWrapper').show();
+                            } else{
+                                $error.html('Username is already taken');
+                            }
+                        });
+                        $('#username').val('');
+                        return false;
+                      });
+
+
+                    socket.on('usernames', function(data){
+                        var html = '';
+                        for(i = 0; i < data.length;i++){
+                            html += data[i] + '<br>';
+                        }
+                        $users.html(html);
+                    });
+
+
+                  $('#messageFrom').submit(function(){
+                    socket.emit('chat message', $('#m').val());
+                    $('#m').val('');
+                    return false;
+                  });
+                  socket.on('chat message', function(data){
+                    $('#chatWindow').append('<strong>'+data.user+'</strong> : '+data.msg+'<br>');
+                  });
+                });
+              </script>
+    </body>
+</html>
